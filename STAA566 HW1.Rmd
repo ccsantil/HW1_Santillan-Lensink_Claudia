@@ -20,21 +20,33 @@ library(viridisLite)
 library(viridis)
 ```
 
+# 2019 Boston Marathon Finishing Times by Age and Country
+
+I downloaded the 2019 Boston Marathon finishing times by country from Kaggle and explored finishing times by age and country. With 109 countries represented and over 26,000 athletes, I selected only the countries with the seven highest number of participants. Subsequent exploration removing US athletes' data from the plot would likely yield more interesting trends in the data since the United States is so disproportionately represented in the data.
+
 
 ```{r readindata}
 bostonmarathon <- read.csv("DatasetBoston2019.csv")
 #head(bostonmarathon)
+```
 
+
+```{r sortdata}
+# sort highest to lowest number of participants and select top 7
 most_boston <- bostonmarathon %>% count(Country, sort=TRUE)
 most_boston <- most_boston[1:7,]
 #most_boston
+# Create vector with names of top 7 participating countries
 most_countries <- c(most_boston[,1])
 #most_countries
+```
 
+```{r createplot}
+# plot filtered by countries in the top 7
 pbos <- bostonmarathon %>% 
   filter(Country %in% most_countries) %>%
   ggplot(aes(x=Age,
-             y=(Result_sec/3600),
+             y=(Result_sec/3600), #convert to hours as a continuous variable
              color = Country)) +
   geom_point(alpha = 0.03) +
   theme_tufte(base_size = 10, base_family = "sans") +
@@ -43,9 +55,10 @@ pbos <- bostonmarathon %>%
   xlab("Age (Years)") +
   stat_smooth(alpha = 0.25, method = "loess") +
   theme(plot.title = element_text(hjust = 0.5)) +
-  ggtitle("2019 Boston Marathon Finishing Times by Age\nTop Ten Participating Countries")
+  ggtitle("2019 Boston Marathon Finishing Times by Age\nTop Seven Participating Countries")
 pbos
 
+# write plot to pdf
 pdf("bostonmarathon2019.pdf", height=4, width=6)
 print(pbos)
 dev.off()
