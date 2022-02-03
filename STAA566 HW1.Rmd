@@ -13,24 +13,41 @@ knit: (function(input_file, encoding) {
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(tidyverse)
+library(ggthemes)
+library(viridisLite)
+library(viridis)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r readindata}
+bostonmarathon <- read.csv("DatasetBoston2019.csv")
+#head(bostonmarathon)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+most_boston <- bostonmarathon %>% count(Country, sort=TRUE)
+most_boston <- most_boston[1:7,]
+#most_boston
+most_countries <- c(most_boston[,1])
+#most_countries
 
-```{r cars}
-summary(cars)
+pbos <- bostonmarathon %>% 
+  filter(Country %in% most_countries) %>%
+  ggplot(aes(x=Age,
+             y=(Result_sec/3600),
+             color = Country)) +
+  geom_point(alpha = 0.03) +
+  theme_tufte(base_size = 10, base_family = "sans") +
+  scale_color_viridis(discrete = TRUE) +
+  ylab("Finish Time (hours)") +
+  xlab("Age (Years)") +
+  stat_smooth(alpha = 0.25, method = "loess") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  ggtitle("2019 Boston Marathon Finishing Times by Age\nTop Ten Participating Countries")
+pbos
+
+pdf("bostonmarathon2019.pdf", height=4, width=6)
+print(pbos)
+dev.off()
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
